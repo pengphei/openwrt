@@ -9,17 +9,16 @@ include $(TOPDIR)/rules.mk
 ARCH:=arm
 BOARD:=imx6
 BOARDNAME:=Freescale i.MX 6
+SUBTARGETS:=imx6ul imx6dl imx6q
 FEATURES:=audio display fpu gpio pcie rtc usb usbgadget squashfs targz nand ubifs
-CPU_TYPE:=cortex-a9
-CPU_SUBTYPE:=neon
 MAINTAINER:=Luka Perkov <luka@openwrt.org>
 
 KERNEL_PATCHVER:=4.14
+KERNELNAME:=zImage dtbs
 
 include $(INCLUDE_DIR)/target.mk
 
-KERNELNAME:=zImage dtbs
-
 DEFAULT_PACKAGES += uboot-envtools
+DEFAULT_PACKAGES += partx-utils mkf2fs e2fsprogs
 
 $(eval $(call BuildTarget))
