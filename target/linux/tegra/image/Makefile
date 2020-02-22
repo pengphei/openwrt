@@ -7,8 +7,6 @@
 include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/image.mk
 
-SIGNATURE:=$(shell printf "%.8s" $(SOURCE_DATE_EPOCH))
-
 define Build/tegra-sdcard
 	rm -fR $@.boot
 	mkdir -p $@.boot
@@ -17,7 +15,7 @@ define Build/tegra-sdcard
 		$(foreach dtb,$(DEVICE_DTS),$(CP) $(DTS_DIR)/$(dtb).dtb $@.boot), \
 		$(CP) $(DTS_DIR)/*.dtb $@.boot)
 	sed \
-		-e 's#@ROOT@#$(SIGNATURE)#g' \
+		-e 's#@ROOT@#$(IMG_PART_SIGNATURE)#g' \
 		-e 's#@KERNEL@#$(KERNEL_NAME)#g' \
 		$(BOOT_SCRIPT) > $@-boot.scr
 	mkimage -A arm -O linux -T script -C none -a 0 -e 0 \
@@ -25,8 +23,7 @@ define Build/tegra-sdcard
 		-d $@-boot.scr \
 		$@.boot/boot.scr
 
-	PADDING="$(CONFIG_TARGET_IMAGES_PAD)" \
-	SIGNATURE="$(SIGNATURE)" \
+	SIGNATURE="$(IMG_PART_SIGNATURE)" \
 	$(SCRIPT_DIR)/gen_image_generic.sh \
 		$@ \
 		$(CONFIG_TARGET_KERNEL_PARTSIZE) $@.boot \
@@ -42,18 +39,13 @@ define Device/Default
   IMAGES := sdcard.img.gz
   IMAGE/sdcard.img.gz := tegra-sdcard | gzip | append-metadata
   KERNEL_NAME := zImage
-  KERNEL := kernel-bin
+  KERNEL :=  kernel-bin | uImage none
   PROFILES := Default
   SUPPORTED_DEVICES := $(subst _,$(comma),$(1))
 endef
 
-define Device/compulab_trimslice
-  DEVICE_TITLE := CompuLab TrimSlice
-  DEVICE_DTS := tegra20-trimslice
-  DEVICE_PACKAGES := kmod-r8169 kmod-rt2800-usb kmod-rtc-em3027 \
-	kmod-usb-storage wpad-mini
-  UBOOT := trimslice-mmc
-endef
-TARGET_DEVICES += compulab_trimslice
+include cortex-a9.mk
+include cortex-a15.mk
+include cortex-a57.mk
 
 $(eval $(call BuildImage))
