@@ -16,7 +16,7 @@ endef
 TARGET_DEVICES += tegra124-jetson-tk1
 
 define Device/tegra114-dalmore-t40s-1600
-  DEVICE_TITLE:=NVIDIA Dalmore
+  DEVICE_TITLE:=NVIDIA Dalmore (T40s 1600)
   SUPPORTED_DEVICES:=dalmore,tegra114-dalmore
   DEVICE_DTS:=tegra114-dalmore
   UBOOT:=dalmore-t40s-1600

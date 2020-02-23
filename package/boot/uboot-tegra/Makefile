@@ -42,29 +42,11 @@ define U-Boot/jetson-tk1
   VENDOR:=nvidia
 endef
 
-define U-Boot/dalmore-t40s-1600
+define U-Boot/dalmore
   BUILD_SUBTARGET:=cortexa15
   NAME:=Nvidia Dalmore
-  BUILD_DEVICES:=tegra114-dalmore-t40s-1600
-  UBOOT_IMAGE:=dalmore-t40s-1600.img
-  SOC:=tegra114
-  VENDOR:=nvidia
-endef
-
-define U-Boot/dalmore-t40s-1866
-  BUILD_SUBTARGET:=cortexa15
-  NAME:=Nvidia Dalmore
-  BUILD_DEVICES:=tegra114-dalmore-t40s-1866
-  UBOOT_IMAGE:=dalmore-t40s-1866.img
-  SOC:=tegra114
-  VENDOR:=nvidia
-endef
-
-define U-Boot/dalmore-t40x-1866
-  BUILD_SUBTARGET:=cortexa15
-  NAME:=Nvidia Dalmore
-  BUILD_DEVICES:=tegra114-dalmore-t40s-1600
-  UBOOT_IMAGE:=dalmore-t40x-1866.img
+  BUILD_DEVICES:=tegra114-dalmore-t40s-1600 tegra114-dalmore-t40s-1866 tegra114-dalmore-t40x-1866
+  UBOOT_IMAGE:=dalmore-t40s-1600.img dalmore-t40s-1866.img dalmore-t40x-1866.img
   SOC:=tegra114
   VENDOR:=nvidia
 endef
@@ -72,9 +54,8 @@ endef
 UBOOT_TARGETS := \
 	trimslice \
 	jetson-tk1 \
-	dalmore-t40s-1600 \
-	dalmore-t40s-1866 \
-	dalmore-t40x-1866
+	dalmore \
+	p3450-0000
 
 define Build/bct-image
 	$(CP) $(PKG_BUILD_DIR)/u-boot-dtb-tegra.bin $(PKG_BUILD_DIR)/u-boot.bin
