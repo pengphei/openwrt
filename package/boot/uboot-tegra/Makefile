@@ -51,6 +51,14 @@ define U-Boot/dalmore
   VENDOR:=nvidia
 endef
 
+define U-Boot/p3450-0000
+  BUILD_SUBTARGET:=cortexa57
+  NAME:=Nvidia Jetson Nano
+  BUILD_DEVICES:=tegra210-jetson-nano
+  SOC:=tegra210
+  VENDOR:=nvidia
+endef
+
 UBOOT_TARGETS := \
 	trimslice \
 	jetson-tk1 \
