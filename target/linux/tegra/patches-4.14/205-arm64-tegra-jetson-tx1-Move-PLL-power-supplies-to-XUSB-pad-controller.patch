@@ -1,0 +1,16 @@
+diff --git a/arch/arm64/boot/dts/nvidia/tegra210-p2597.dtsi b/arch/arm64/boot/dts/nvidia/tegra210-p2597.dtsi
+index 95e890d8a119..a7dc319214a4 100644
+--- a/arch/arm64/boot/dts/nvidia/tegra210-p2597.dtsi
++++ b/arch/arm64/boot/dts/nvidia/tegra210-p2597.dtsi
+@@ -1352,6 +1352,11 @@
+ 	padctl@7009f000 {
+ 		status = "okay";
+ 
++		avdd-pll-utmip-supply = <&vdd_1v8>;
++		avdd-pll-uerefe-supply = <&avdd_1v05_pll>;
++		dvdd-pex-pll-supply = <&vdd_pex_1v05>;
++		hvdd-pex-pll-e-supply = <&vdd_1v8>;
++
+ 		pads {
+ 			usb2 {
+ 				status = "okay";

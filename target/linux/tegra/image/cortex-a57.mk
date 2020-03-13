@@ -16,4 +16,14 @@ endef
 
 TARGET_DEVICES += tegra210-p2571
 
+define Device/tegra210-jetson-nano
+  DEVICE_TITLE:=NVIDIA Jetson Nano
+  SUPPORTED_DEVICES:=nvidia,jetson-nano
+  KERNEL_NAME := Image
+  KERNEL := kernel-bin
+  DEVICE_DTS:=nvidia/tegra210-p3450-0000
+endef
+
+TARGET_DEVICES += tegra210-jetson-nano
+
 endif
