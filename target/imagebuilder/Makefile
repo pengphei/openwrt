@@ -81,7 +81,7 @@ endif
 	rm -rf \
 		$(PKG_BUILD_DIR)/target/linux/*/files{,-*} \
 		$(PKG_BUILD_DIR)/target/linux/*/patches{,-*} \
-		$(PKG_BUILD_DIR)/target/linux/generic/{pending,backport,hack}{,-*}
+		$(PKG_BUILD_DIR)/target/linux/generic/{pending,backport,hack,rt}{,-*}
 	-cp $(KERNEL_BUILD_DIR)/* $(IB_KDIR)/ # don't copy subdirectories here
 	-cp $(LINUX_DIR)/.config $(IB_LDIR)/
 	rm -f $(IB_KDIR)/root.*
