@@ -1,0 +1,42 @@
+From e446c6351040a7944f2442d6cbc93cdb3d16c7c4 Mon Sep 17 00:00:00 2001
+Message-Id: <e446c6351040a7944f2442d6cbc93cdb3d16c7c4.1622827625.git.zanussi@kernel.org>
+In-Reply-To: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+References: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+From: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Date: Wed, 22 May 2019 12:42:26 +0200
+Subject: [PATCH 074/307] sched/swait: Add swait_event_lock_irq()
+
+The swait_event_lock_irq() is inspired by wait_event_lock_irq(). This is
+required by the workqueue code once it switches to swait.
+
+Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+---
+ include/linux/swait.h | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/include/linux/swait.h b/include/linux/swait.h
+index 73e06e9986d4..12612823c2cb 100644
+--- a/include/linux/swait.h
++++ b/include/linux/swait.h
+@@ -297,4 +297,18 @@ do {									\
+ 	__ret;								\
+ })
+ 
++#define __swait_event_lock_irq(wq, condition, lock, cmd)		\
++	___swait_event(wq, condition, TASK_UNINTERRUPTIBLE, 0,		\
++		       raw_spin_unlock_irq(&lock);			\
++		       cmd;						\
++		       schedule();					\
++		       raw_spin_lock_irq(&lock))
++
++#define swait_event_lock_irq(wq_head, condition, lock)			\
++	do {								\
++		if (condition)						\
++			break;						\
++		__swait_event_lock_irq(wq_head, condition, lock, );	\
++	} while (0)
++
+ #endif /* _LINUX_SWAIT_H */
+-- 
+2.17.1
+

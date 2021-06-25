@@ -1,0 +1,31 @@
+From 2c49f8a824075d1b2234290346943110417b5816 Mon Sep 17 00:00:00 2001
+Message-Id: <2c49f8a824075d1b2234290346943110417b5816.1622827626.git.zanussi@kernel.org>
+In-Reply-To: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+References: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+From: Thomas Gleixner <tglx@linutronix.de>
+Date: Mon, 24 Feb 2020 15:01:36 +0100
+Subject: [PATCH 227/307] bpf/trace: Remove EXPORT from trace_call_bpf()
+
+All callers are built in. No point to export this.
+
+Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+---
+ kernel/trace/bpf_trace.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/kernel/trace/bpf_trace.c b/kernel/trace/bpf_trace.c
+index fc626b3b5612..5e06f754f82c 100644
+--- a/kernel/trace/bpf_trace.c
++++ b/kernel/trace/bpf_trace.c
+@@ -119,7 +119,6 @@ unsigned int trace_call_bpf(struct trace_event_call *call, void *ctx)
+ 
+ 	return ret;
+ }
+-EXPORT_SYMBOL_GPL(trace_call_bpf);
+ 
+ #ifdef CONFIG_BPF_KPROBE_OVERRIDE
+ BPF_CALL_2(bpf_override_return, struct pt_regs *, regs, unsigned long, rc)
+-- 
+2.17.1
+

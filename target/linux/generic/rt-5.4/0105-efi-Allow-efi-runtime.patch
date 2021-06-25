@@ -1,0 +1,34 @@
+From 8f3da3f66b9bfc71718158cd38e4b4436cca85e7 Mon Sep 17 00:00:00 2001
+Message-Id: <8f3da3f66b9bfc71718158cd38e4b4436cca85e7.1622827626.git.zanussi@kernel.org>
+In-Reply-To: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+References: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+From: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Date: Thu, 26 Jul 2018 15:06:10 +0200
+Subject: [PATCH 105/307] efi: Allow efi=runtime
+
+In case the command line option "efi=noruntime" is default at built-time, the user
+could overwrite its state by `efi=runtime' and allow it again.
+
+Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+---
+ drivers/firmware/efi/efi.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 41dbf8649326..a8383445e017 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -94,6 +94,9 @@ static int __init parse_efi_cmdline(char *str)
+ 	if (parse_option_str(str, "noruntime"))
+ 		disable_runtime = true;
+ 
++	if (parse_option_str(str, "runtime"))
++		disable_runtime = false;
++
+ 	return 0;
+ }
+ early_param("efi", parse_efi_cmdline);
+-- 
+2.17.1
+

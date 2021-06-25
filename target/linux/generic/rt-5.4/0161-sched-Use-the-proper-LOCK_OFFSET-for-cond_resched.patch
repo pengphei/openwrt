@@ -1,0 +1,35 @@
+From d74820b6aae33910a872280aa66bd395a92df80f Mon Sep 17 00:00:00 2001
+Message-Id: <d74820b6aae33910a872280aa66bd395a92df80f.1622827626.git.zanussi@kernel.org>
+In-Reply-To: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+References: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+From: Thomas Gleixner <tglx@linutronix.de>
+Date: Sun, 17 Jul 2011 22:51:33 +0200
+Subject: [PATCH 161/307] sched: Use the proper LOCK_OFFSET for cond_resched()
+
+RT does not increment preempt count when a 'sleeping' spinlock is
+locked. Update PREEMPT_LOCK_OFFSET for that case.
+
+Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+---
+ include/linux/preempt.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/include/linux/preempt.h b/include/linux/preempt.h
+index 621ea3d11af7..0e88996747da 100644
+--- a/include/linux/preempt.h
++++ b/include/linux/preempt.h
+@@ -124,7 +124,11 @@
+ /*
+  * The preempt_count offset after spin_lock()
+  */
++#if !defined(CONFIG_PREEMPT_RT)
+ #define PREEMPT_LOCK_OFFSET	PREEMPT_DISABLE_OFFSET
++#else
++#define PREEMPT_LOCK_OFFSET	0
++#endif
+ 
+ /*
+  * The preempt_count offset needed for things like:
+-- 
+2.17.1
+

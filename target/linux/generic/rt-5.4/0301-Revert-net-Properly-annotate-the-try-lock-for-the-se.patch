@@ -1,0 +1,64 @@
+From 733b21d761ff8f8dd24c2df2f671ba25edd992a4 Mon Sep 17 00:00:00 2001
+Message-Id: <733b21d761ff8f8dd24c2df2f671ba25edd992a4.1622827627.git.zanussi@kernel.org>
+In-Reply-To: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+References: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+From: "Steven Rostedt (VMware)" <rostedt@goodmis.org>
+Date: Fri, 11 Dec 2020 16:07:32 -0500
+Subject: [PATCH 301/307] Revert "net: Properly annotate the try-lock for the
+ seqlock"
+
+This reverts commit 3971227b5af04e6c34ef7b47b2ebe941727563a0.
+
+Link: https://lore.kernel.org/r/20201116171958.2opbksmgbznrjxu2@linutronix.de
+
+Signed-off-by: Steven Rostedt (VMware) <rostedt@goodmis.org>
+---
+ include/linux/seqlock.h   |  9 +++++++++
+ include/net/sch_generic.h | 10 +---------
+ 2 files changed, 10 insertions(+), 9 deletions(-)
+
+diff --git a/include/linux/seqlock.h b/include/linux/seqlock.h
+index f390293974ea..e5207897c33e 100644
+--- a/include/linux/seqlock.h
++++ b/include/linux/seqlock.h
+@@ -489,6 +489,15 @@ static inline void write_seqlock(seqlock_t *sl)
+ 	__raw_write_seqcount_begin(&sl->seqcount);
+ }
+ 
++static inline int try_write_seqlock(seqlock_t *sl)
++{
++	if (spin_trylock(&sl->lock)) {
++		__raw_write_seqcount_begin(&sl->seqcount);
++		return 1;
++	}
++	return 0;
++}
++
+ static inline void write_sequnlock(seqlock_t *sl)
+ {
+ 	__raw_write_seqcount_end(&sl->seqcount);
+diff --git a/include/net/sch_generic.h b/include/net/sch_generic.h
+index 25c2ec348d22..d10477f0e628 100644
+--- a/include/net/sch_generic.h
++++ b/include/net/sch_generic.h
+@@ -168,16 +168,8 @@ static inline bool qdisc_run_begin(struct Qdisc *qdisc)
+ 		return false;
+ 	}
+ #ifdef CONFIG_PREEMPT_RT
+-	if (spin_trylock(&qdisc->running.lock)) {
+-		seqcount_t *s = &qdisc->running.seqcount;
+-		/*
+-		 * Variant of write_seqcount_t_begin() telling lockdep that a
+-		 * trylock was attempted.
+-		 */
+-		__raw_write_seqcount_begin(s);
+-		seqcount_acquire(&s->dep_map, 0, 1, _RET_IP_);
++	if (try_write_seqlock(&qdisc->running))
+ 		return true;
+-	}
+ 	return false;
+ #else
+ 	/* Variant of write_seqcount_begin() telling lockdep a trylock
+-- 
+2.17.1
+

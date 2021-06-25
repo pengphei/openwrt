@@ -1,0 +1,44 @@
+From 8aff8e1496b1cdaf0f787269bb795c82939a6bc2 Mon Sep 17 00:00:00 2001
+Message-Id: <8aff8e1496b1cdaf0f787269bb795c82939a6bc2.1622827625.git.zanussi@kernel.org>
+In-Reply-To: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+References: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+From: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Date: Tue, 11 Jun 2019 11:21:02 +0200
+Subject: [PATCH 073/307] workqueue: Don't assume that the callback has
+ interrupts disabled
+
+Due to the TIMER_IRQSAFE flag, the timer callback is invoked with
+disabled interrupts. On -RT the callback is invoked in softirq context
+with enabled interrupts. Since the interrupts are threaded, there are
+are no in_irq() users. The local_bh_disable() around the threaded
+handler ensures that there is either a timer or a threaded handler
+active on the CPU.
+
+Disable interrupts before __queue_work() is invoked from the timer
+callback.
+
+Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+---
+ kernel/workqueue.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/kernel/workqueue.c b/kernel/workqueue.c
+index 711f670f1a8e..29fdf0877977 100644
+--- a/kernel/workqueue.c
++++ b/kernel/workqueue.c
+@@ -1616,9 +1616,11 @@ EXPORT_SYMBOL_GPL(queue_work_node);
+ void delayed_work_timer_fn(struct timer_list *t)
+ {
+ 	struct delayed_work *dwork = from_timer(dwork, t, timer);
++	unsigned long flags;
+ 
+-	/* should have been called from irqsafe timer with irq already off */
++	local_irq_save(flags);
+ 	__queue_work(dwork->cpu, dwork->wq, &dwork->work);
++	local_irq_restore(flags);
+ }
+ EXPORT_SYMBOL(delayed_work_timer_fn);
+ 
+-- 
+2.17.1
+

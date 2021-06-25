@@ -1,0 +1,55 @@
+From 25c7a9054b63d29e0820466dda56e96427559e52 Mon Sep 17 00:00:00 2001
+Message-Id: <25c7a9054b63d29e0820466dda56e96427559e52.1622827626.git.zanussi@kernel.org>
+In-Reply-To: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+References: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+From: Thomas Gleixner <tglx@linutronix.de>
+Date: Fri, 24 Jul 2009 12:38:56 +0200
+Subject: [PATCH 119/307] preempt: Provide preempt_*_(no)rt variants
+
+RT needs a few preempt_disable/enable points which are not necessary
+otherwise. Implement variants to avoid #ifdeffery.
+
+Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+---
+ include/linux/preempt.h | 18 +++++++++++++++++-
+ 1 file changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/include/linux/preempt.h b/include/linux/preempt.h
+index c5c682b2aac4..4e65562d0965 100644
+--- a/include/linux/preempt.h
++++ b/include/linux/preempt.h
+@@ -187,7 +187,11 @@ do { \
+ 	preempt_count_dec(); \
+ } while (0)
+ 
+-#define preempt_enable_no_resched() sched_preempt_enable_no_resched()
++#ifdef CONFIG_PREEMPT_RT
++# define preempt_enable_no_resched() sched_preempt_enable_no_resched()
++#else
++# define preempt_enable_no_resched() preempt_enable()
++#endif
+ 
+ #define preemptible()	(preempt_count() == 0 && !irqs_disabled())
+ 
+@@ -281,6 +285,18 @@ do { \
+ 		set_preempt_need_resched(); \
+ } while (0)
+ 
++#ifdef CONFIG_PREEMPT_RT
++# define preempt_disable_rt()		preempt_disable()
++# define preempt_enable_rt()		preempt_enable()
++# define preempt_disable_nort()		barrier()
++# define preempt_enable_nort()		barrier()
++#else
++# define preempt_disable_rt()		barrier()
++# define preempt_enable_rt()		barrier()
++# define preempt_disable_nort()		preempt_disable()
++# define preempt_enable_nort()		preempt_enable()
++#endif
++
+ #ifdef CONFIG_PREEMPT_NOTIFIERS
+ 
+ struct preempt_notifier;
+-- 
+2.17.1
+

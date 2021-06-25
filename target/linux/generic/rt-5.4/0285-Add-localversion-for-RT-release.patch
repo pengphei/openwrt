@@ -1,0 +1,24 @@
+From 27401fb4ed2076bf298fd35794641c488381ab73 Mon Sep 17 00:00:00 2001
+Message-Id: <27401fb4ed2076bf298fd35794641c488381ab73.1622827627.git.zanussi@kernel.org>
+In-Reply-To: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+References: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+From: Thomas Gleixner <tglx@linutronix.de>
+Date: Fri, 8 Jul 2011 20:25:16 +0200
+Subject: [PATCH 285/307] Add localversion for -RT release
+
+Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+---
+ localversion-rt | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 localversion-rt
+
+diff --git a/localversion-rt b/localversion-rt
+new file mode 100644
+index 000000000000..483ad771f201
+--- /dev/null
++++ b/localversion-rt
+@@ -0,0 +1 @@
++-rt19
+-- 
+2.17.1
+

@@ -1,0 +1,48 @@
+From 7e6c25dc19e0ceb923f3092e7f2a83991c11a2cc Mon Sep 17 00:00:00 2001
+Message-Id: <7e6c25dc19e0ceb923f3092e7f2a83991c11a2cc.1622827625.git.zanussi@kernel.org>
+In-Reply-To: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+References: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+From: John Ogness <john.ogness@linutronix.de>
+Date: Thu, 14 Feb 2019 23:13:30 +0100
+Subject: [PATCH 042/307] printk: set deferred to default loglevel, enforce
+ mask
+
+All messages printed via vpritnk_deferred() were being
+automatically treated as emergency messages.
+
+Messages printed via vprintk_deferred() should be set to the
+default loglevel. LOGLEVEL_SCHED is no longer relevant.
+
+Also, enforce the loglevel mask for emergency messages.
+
+Signed-off-by: John Ogness <john.ogness@linutronix.de>
+Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+---
+ kernel/printk/printk.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/kernel/printk/printk.c b/kernel/printk/printk.c
+index 16ceef380243..28c8fa7152b0 100644
+--- a/kernel/printk/printk.c
++++ b/kernel/printk/printk.c
+@@ -1982,7 +1982,7 @@ asmlinkage int vprintk_emit(int facility, int level,
+ 	 * - text points to beginning of text
+ 	 * - there is room before text for prefix
+ 	 */
+-	printk_emergency(rbuf, level, ts_nsec, cpu, text, text_len);
++	printk_emergency(rbuf, level & 7, ts_nsec, cpu, text, text_len);
+ 
+ 	if ((lflags & LOG_CONT) || !(lflags & LOG_NEWLINE)) {
+ 		 cont_add(ctx, cpu, caller_id, facility, level, lflags, text, text_len);
+@@ -2778,7 +2778,7 @@ late_initcall(init_printk_kthread);
+ 
+ static int vprintk_deferred(const char *fmt, va_list args)
+ {
+-	return vprintk_emit(0, LOGLEVEL_SCHED, NULL, 0, fmt, args);
++	return vprintk_emit(0, LOGLEVEL_DEFAULT, NULL, 0, fmt, args);
+ }
+ 
+ int printk_deferred(const char *fmt, ...)
+-- 
+2.17.1
+

@@ -1,0 +1,41 @@
+From 044fe2f4bc705db3c20030e5b4cf216b170b3039 Mon Sep 17 00:00:00 2001
+Message-Id: <044fe2f4bc705db3c20030e5b4cf216b170b3039.1622827625.git.zanussi@kernel.org>
+In-Reply-To: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+References: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+From: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Date: Tue, 3 Mar 2020 13:43:25 +0100
+Subject: [PATCH 070/307] =?UTF-8?q?mm/compaction:=20Really=20limit=20compa?=
+ =?UTF-8?q?ct=5Funevictable=5Fallowed=20to=200=E2=80=A61?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The proc file `compact_unevictable_allowed' should allow 0 and 1 only,
+the `extra*' attribues have been set properly but without
+proc_dointvec_minmax() as the `proc_handler' the limit will not be
+enforced.
+
+Use proc_dointvec_minmax() as the `proc_handler' to enfoce the valid
+specified range.
+
+Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+---
+ kernel/sysctl.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/kernel/sysctl.c b/kernel/sysctl.c
+index eae6a078619f..27dd650fba3d 100644
+--- a/kernel/sysctl.c
++++ b/kernel/sysctl.c
+@@ -1493,7 +1493,7 @@ static struct ctl_table vm_table[] = {
+ 		.data		= &sysctl_compact_unevictable_allowed,
+ 		.maxlen		= sizeof(int),
+ 		.mode		= 0644,
+-		.proc_handler	= proc_dointvec,
++		.proc_handler	= proc_dointvec_minmax,
+ 		.extra1		= SYSCTL_ZERO,
+ 		.extra2		= SYSCTL_ONE,
+ 	},
+-- 
+2.17.1
+

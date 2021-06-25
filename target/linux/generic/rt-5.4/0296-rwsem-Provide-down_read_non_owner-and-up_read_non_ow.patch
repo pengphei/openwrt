@@ -1,0 +1,61 @@
+From db076709edb83a1050db4d3c163c20e62cc85ada Mon Sep 17 00:00:00 2001
+Message-Id: <db076709edb83a1050db4d3c163c20e62cc85ada.1622827627.git.zanussi@kernel.org>
+In-Reply-To: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+References: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+From: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Date: Fri, 12 Jun 2020 16:51:50 +0200
+Subject: [PATCH 296/307] rwsem: Provide down_read_non_owner() and
+ up_read_non_owner() for -RT
+
+The rwsem implementation on -RT allows multiple reader and there is no
+owner tracking anymore.
+We can provide down_read_non_owner() and up_read_non_owner() by skipping
+the owner check bits which are only available in the !RT implementation.
+
+Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Signed-off-by: Steven Rostedt (VMware) <rostedt@goodmis.org>
+---
+ kernel/locking/rwsem.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/kernel/locking/rwsem.c b/kernel/locking/rwsem.c
+index 560943e5b626..8dffbfa3bcd9 100644
+--- a/kernel/locking/rwsem.c
++++ b/kernel/locking/rwsem.c
+@@ -1656,15 +1656,15 @@ void _down_write_nest_lock(struct rw_semaphore *sem, struct lockdep_map *nest)
+ }
+ EXPORT_SYMBOL(_down_write_nest_lock);
+ 
+-#ifndef CONFIG_PREEMPT_RT
+ void down_read_non_owner(struct rw_semaphore *sem)
+ {
+ 	might_sleep();
+ 	__down_read(sem);
++#ifndef CONFIG_PREEMPT_RT
+ 	__rwsem_set_reader_owned(sem, NULL);
++#endif
+ }
+ EXPORT_SYMBOL(down_read_non_owner);
+-#endif
+ 
+ void down_write_nested(struct rw_semaphore *sem, int subclass)
+ {
+@@ -1689,13 +1689,13 @@ int __sched down_write_killable_nested(struct rw_semaphore *sem, int subclass)
+ }
+ EXPORT_SYMBOL(down_write_killable_nested);
+ 
+-#ifndef CONFIG_PREEMPT_RT
+ void up_read_non_owner(struct rw_semaphore *sem)
+ {
++#ifndef CONFIG_PREEMPT_RT
+ 	DEBUG_RWSEMS_WARN_ON(!is_rwsem_reader_owned(sem), sem);
++#endif
+ 	__up_read(sem);
+ }
+ EXPORT_SYMBOL(up_read_non_owner);
+-#endif
+ 
+ #endif
+-- 
+2.17.1
+

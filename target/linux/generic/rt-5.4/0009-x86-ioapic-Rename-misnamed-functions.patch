@@ -1,0 +1,95 @@
+From 971a11bdc3382a09be9408eecbb99c333012e514 Mon Sep 17 00:00:00 2001
+Message-Id: <971a11bdc3382a09be9408eecbb99c333012e514.1622827625.git.zanussi@kernel.org>
+In-Reply-To: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+References: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+From: Thomas Gleixner <tglx@linutronix.de>
+Date: Thu, 17 Oct 2019 12:19:02 +0200
+Subject: [PATCH 009/307] x86/ioapic: Rename misnamed functions
+
+ioapic_irqd_[un]mask() are misnomers as both functions do way more than
+masking and unmasking the interrupt line. Both deal with the moving the
+affinity of the interrupt within interrupt context. The mask/unmask is just
+a tiny part of the functionality.
+
+Rename them to ioapic_prepare/finish_move(), fixup the call sites and
+rename the related variables in the code to reflect what this is about.
+
+No functional change.
+
+Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+Cc: Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Sebastian Siewior <bigeasy@linutronix.de>
+Link: https://lkml.kernel.org/r/20191017101938.412489856@linutronix.de
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+---
+ arch/x86/kernel/apic/io_apic.c | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/arch/x86/kernel/apic/io_apic.c b/arch/x86/kernel/apic/io_apic.c
+index 0edcf69659ee..90287b555027 100644
+--- a/arch/x86/kernel/apic/io_apic.c
++++ b/arch/x86/kernel/apic/io_apic.c
+@@ -1735,7 +1735,7 @@ static bool io_apic_level_ack_pending(struct mp_chip_data *data)
+ 	return false;
+ }
+ 
+-static inline bool ioapic_irqd_mask(struct irq_data *data)
++static inline bool ioapic_prepare_move(struct irq_data *data)
+ {
+ 	/* If we are moving the IRQ we need to mask it */
+ 	if (unlikely(irqd_is_setaffinity_pending(data))) {
+@@ -1746,9 +1746,9 @@ static inline bool ioapic_irqd_mask(struct irq_data *data)
+ 	return false;
+ }
+ 
+-static inline void ioapic_irqd_unmask(struct irq_data *data, bool masked)
++static inline void ioapic_finish_move(struct irq_data *data, bool moveit)
+ {
+-	if (unlikely(masked)) {
++	if (unlikely(moveit)) {
+ 		/* Only migrate the irq if the ack has been received.
+ 		 *
+ 		 * On rare occasions the broadcast level triggered ack gets
+@@ -1783,11 +1783,11 @@ static inline void ioapic_irqd_unmask(struct irq_data *data, bool masked)
+ 	}
+ }
+ #else
+-static inline bool ioapic_irqd_mask(struct irq_data *data)
++static inline bool ioapic_prepare_move(struct irq_data *data)
+ {
+ 	return false;
+ }
+-static inline void ioapic_irqd_unmask(struct irq_data *data, bool masked)
++static inline void ioapic_finish_move(struct irq_data *data, bool moveit)
+ {
+ }
+ #endif
+@@ -1796,11 +1796,11 @@ static void ioapic_ack_level(struct irq_data *irq_data)
+ {
+ 	struct irq_cfg *cfg = irqd_cfg(irq_data);
+ 	unsigned long v;
+-	bool masked;
++	bool moveit;
+ 	int i;
+ 
+ 	irq_complete_move(cfg);
+-	masked = ioapic_irqd_mask(irq_data);
++	moveit = ioapic_prepare_move(irq_data);
+ 
+ 	/*
+ 	 * It appears there is an erratum which affects at least version 0x11
+@@ -1855,7 +1855,7 @@ static void ioapic_ack_level(struct irq_data *irq_data)
+ 		eoi_ioapic_pin(cfg->vector, irq_data->chip_data);
+ 	}
+ 
+-	ioapic_irqd_unmask(irq_data, masked);
++	ioapic_finish_move(irq_data, moveit);
+ }
+ 
+ static void ioapic_ir_ack_level(struct irq_data *irq_data)
+-- 
+2.17.1
+

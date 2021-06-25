@@ -1,0 +1,35 @@
+From af8e93898da31eb177c483803041c48e94530383 Mon Sep 17 00:00:00 2001
+Message-Id: <af8e93898da31eb177c483803041c48e94530383.1622827625.git.zanussi@kernel.org>
+In-Reply-To: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+References: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+From: Davidlohr Bueso <dave@stgolabs.net>
+Date: Fri, 31 Jan 2020 16:07:10 +0100
+Subject: [PATCH 061/307] locking/percpu-rwsem: Add might_sleep() for writer
+ locking
+
+We are missing this annotation in percpu_down_write(). Correct
+this.
+
+Signed-off-by: Davidlohr Bueso <dbueso@suse.de>
+Signed-off-by: Peter Zijlstra (Intel) <peterz@infradead.org>
+Link: https://lkml.kernel.org/r/20200108013305.7732-1-dave@stgolabs.net
+Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+---
+ kernel/locking/percpu-rwsem.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/kernel/locking/percpu-rwsem.c b/kernel/locking/percpu-rwsem.c
+index 94c901b350f4..e4a4a56037bb 100644
+--- a/kernel/locking/percpu-rwsem.c
++++ b/kernel/locking/percpu-rwsem.c
+@@ -212,6 +212,7 @@ static bool readers_active_check(struct percpu_rw_semaphore *sem)
+ 
+ void percpu_down_write(struct percpu_rw_semaphore *sem)
+ {
++	might_sleep();
+ 	rwsem_acquire(&sem->dep_map, 0, 0, _RET_IP_);
+ 
+ 	/* Notify readers to take the slow path. */
+-- 
+2.17.1
+

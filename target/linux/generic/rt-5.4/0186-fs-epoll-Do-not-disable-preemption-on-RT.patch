@@ -1,0 +1,39 @@
+From 52d752ef60c874399d593204678ef32e546b6756 Mon Sep 17 00:00:00 2001
+Message-Id: <52d752ef60c874399d593204678ef32e546b6756.1622827626.git.zanussi@kernel.org>
+In-Reply-To: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+References: <c14b74533619106939435325487891934c66f094.1622827625.git.zanussi@kernel.org>
+From: Thomas Gleixner <tglx@linutronix.de>
+Date: Fri, 8 Jul 2011 16:35:35 +0200
+Subject: [PATCH 186/307] fs/epoll: Do not disable preemption on RT
+
+ep_call_nested() takes a sleeping lock so we can't disable preemption.
+The light version is enough since ep_call_nested() doesn't mind beeing
+invoked twice on the same CPU.
+
+Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+---
+ fs/eventpoll.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/fs/eventpoll.c b/fs/eventpoll.c
+index 339453ac834c..2f2eefb59299 100644
+--- a/fs/eventpoll.c
++++ b/fs/eventpoll.c
+@@ -565,12 +565,12 @@ static int ep_poll_wakeup_proc(void *priv, void *cookie, int call_nests)
+ 
+ static void ep_poll_safewake(wait_queue_head_t *wq)
+ {
+-	int this_cpu = get_cpu();
++	int this_cpu = get_cpu_light();
+ 
+ 	ep_call_nested(&poll_safewake_ncalls,
+ 		       ep_poll_wakeup_proc, NULL, wq, (void *) (long) this_cpu);
+ 
+-	put_cpu();
++	put_cpu_light();
+ }
+ 
+ #else
+-- 
+2.17.1
+
