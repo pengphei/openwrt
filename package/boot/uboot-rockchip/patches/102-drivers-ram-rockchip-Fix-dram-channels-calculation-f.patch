@@ -1,0 +1,39 @@
+From 1a7a435259923fa03658f6e3c01869a7ace60c21 Mon Sep 17 00:00:00 2001
+From: Han Pengfei <pengphei@foxmail.com>
+Date: Sun, 15 May 2022 02:12:30 +0800
+Subject: [PATCH] drivers: ram: rockchip: Fix dram channels calculation for
+ rk3399
+
+Only add the dram channel when we finally setup it successfully at the
+last step.
+
+Signed-off-by: Han Pengfei <pengphei@foxmail.com>
+---
+ drivers/ram/rockchip/sdram_rk3399.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/ram/rockchip/sdram_rk3399.c b/drivers/ram/rockchip/sdram_rk3399.c
+index c0a06dcaed..fd8ba45d68 100644
+--- a/drivers/ram/rockchip/sdram_rk3399.c
++++ b/drivers/ram/rockchip/sdram_rk3399.c
+@@ -2964,8 +2964,6 @@ static int sdram_init(struct dram_info *dram,
+ 		if (cap_info->rank == 0) {
+ 			clear_channel_params(params, 1);
+ 			continue;
+-		} else {
+-			params->base.num_channels++;
+ 		}
+ 
+ 		if (IS_ENABLED(CONFIG_RAM_ROCKCHIP_DEBUG)) {
+@@ -2991,6 +2989,8 @@ static int sdram_init(struct dram_info *dram,
+ 			printf("no ddrconfig find, Cap not support!\n");
+ 			continue;
+ 		}
++		
++		params->base.num_channels++;
+ 		set_ddrconfig(chan, params, channel, cap_info->ddrconfig);
+ 		set_cap_relate_config(chan, params, channel);
+ 	}
+-- 
+2.38.1
+
