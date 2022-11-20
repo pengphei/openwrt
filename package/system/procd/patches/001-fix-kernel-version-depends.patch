@@ -1,0 +1,36 @@
+Index: procd-2022-11-10-039b88f7/trace/trace.c
+===================================================================
+--- procd-2022-11-10-039b88f7.orig/trace/trace.c
++++ procd-2022-11-10-039b88f7/trace/trace.c
+@@ -49,7 +49,13 @@
+ #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+ 
+ #if defined (__aarch64__)
++#include <linux/version.h>
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0)
+ #include <linux/ptrace.h>
++#else
++#include <asm/ptrace.h>		/* for PTRACE_SET_SYSCALL */
++#define reg_syscall_nr	_offsetof(struct user_regs_struct, regs[7])
++#endif
+ #elif defined(__amd64__)
+ #define reg_syscall_nr	_offsetof(struct user, regs.orig_rax)
+ #elif defined(__arm__)
+@@ -226,7 +232,7 @@ static void tracer_cb(struct uloop_proce
+ 	if (WIFSTOPPED(ret) || (ret >> 16)) {
+ 		if (WSTOPSIG(ret) & 0x80) {
+ 			if (!tracee->in_syscall) {
+-#ifdef __aarch64__
++#if defined(__aarch64__) && LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0)
+ 				int syscall = -1;
+ 				struct ptrace_syscall_info ptsi = {.op=PTRACE_SYSCALL_INFO_ENTRY};
+ 				if (ptrace(PTRACE_GET_SYSCALL_INFO, c->pid, sizeof(ptsi), &ptsi) != -1)
+@@ -260,7 +266,7 @@ static void tracer_cb(struct uloop_proce
+ 		} else if ((ret >> 16) == PTRACE_EVENT_STOP) {
+ 			/* Nothing special to do here */
+ 		} else if ((ret >> 8) == (SIGTRAP | (PTRACE_EVENT_SECCOMP << 8))) {
+-#ifdef __aarch64__
++#if defined(__aarch64__) && LINUX_VERSION_CODE >= KERNEL_VERSION(5, 3, 0)
+ 			int syscall = -1;
+ 			struct ptrace_syscall_info ptsi = {.op=PTRACE_SYSCALL_INFO_SECCOMP};
+ 			if (ptrace(PTRACE_GET_SYSCALL_INFO, c->pid, sizeof(ptsi), &ptsi) != -1)
