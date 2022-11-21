@@ -66,3 +66,14 @@ define Device/evb_evb1-v10
   IMAGE/sysupgrade.img.gz := boot-common-legacy | boot-script rk3568-mmc | pine64-img | gzip | append-metadata
 endef
 TARGET_DEVICES += evb_evb1-v10
+
+define Device/firefly_rk3308_roc-cc
+  DEVICE_VENDOR := Firefly
+  DEVICE_MODEL := RK3308 ROC CC
+  SOC := rk3308
+  SUPPORTED_DEVICES := firefly,roc-rk3308-cc
+  UBOOT_DEVICE_NAME := roc-cc-rk3308
+  KERNEL = kernel-bin
+  IMAGE/sysupgrade.img.gz := boot-common-legacy | boot-script rk3308-mmc | pine64-img | gzip | append-metadata
+endef
+TARGET_DEVICES += firefly_rk3308_roc-cc
