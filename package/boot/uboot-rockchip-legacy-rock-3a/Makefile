@@ -38,8 +38,25 @@ define U-Boot/rock-3a-rk3568
   BL31_BLOB:=rk35/rk3568_bl31_v1.34.elf
 endef
 
+# RK 3308
+
+define U-Boot/roc-cc-rk3308
+  BUILD_SUBTARGET:=armv8
+  UBOOT_CONFIG:=evb-rk3308
+  NAME:=Firefly Roc CC
+  BOOT_SOC:=rk3308
+  BUILD_DEVICES:= \
+    firefly_rk3308_roc-cc
+  DEPENDS:=+PACKAGE_u-boot-roc-cc-rk3308:arm-trusted-firmware-rockchip-legacy
+  PKG_BUILD_DEPENDS:=arm-trusted-firmware-rockchip-legacy
+  DDR_BLOB:=rk33/rk3308_ddr_589MHz_uart2_m0_v1.26.bin
+  BL31_BLOB:=rk33/rk3308_bl31_v2.25.elf
+endef
+
+
 UBOOT_TARGETS := \
-  rock-3a-rk3568
+  rock-3a-rk3568 \
+  roc-cc-rk3308
 
 UBOOT_CONFIGURE_VARS += USE_PRIVATE_LIBGCC=yes
 
