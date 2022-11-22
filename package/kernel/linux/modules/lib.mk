@@ -107,12 +107,20 @@ define KernelPackage/lib-lzo
 	CONFIG_LZO_COMPRESS \
 	CONFIG_LZO_DECOMPRESS
   HIDDEN:=1
+ifneq ($(wildcard $(LINUX_DIR)/crypto/lzo-rle.ko),)
   FILES:= \
 	$(LINUX_DIR)/crypto/lzo.ko \
 	$(LINUX_DIR)/crypto/lzo-rle.ko \
 	$(LINUX_DIR)/lib/lzo/lzo_compress.ko \
 	$(LINUX_DIR)/lib/lzo/lzo_decompress.ko
   AUTOLOAD:=$(call AutoProbe,lzo lzo-rle lzo_compress lzo_decompress)
+else
+  FILES:= \
+	$(LINUX_DIR)/crypto/lzo.ko \
+	$(LINUX_DIR)/lib/lzo/lzo_compress.ko \
+	$(LINUX_DIR)/lib/lzo/lzo_decompress.ko
+  AUTOLOAD:=$(call AutoProbe,lzo lzo_compress lzo_decompress)
+endif
 endef
 
 define KernelPackage/lib-lzo/description
